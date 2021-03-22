@@ -1,0 +1,134 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>qrc;rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Form Files">
+      <UniqueIdentifier>{99349809-55BA-4b9d-BF79-8FDBB0286EB3}</UniqueIdentifier>
+      <Extensions>ui</Extensions>
+    </Filter>
+    <Filter Include="Form Files\Source Files">
+      <UniqueIdentifier>{f6c11bdc-919c-42a3-9c0b-4bc5bacea51e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Form Files\Header Files">
+      <UniqueIdentifier>{2d730599-9b6f-47a6-8361-44a243dda8e6}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <QtRcc Include="AOBScannerEx.qrc">
+      <Filter>Resource Files</Filter>
+    </QtRcc>
+    <ClInclude Include="stdafx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CAoBTreeItem.cpp">
+      <Filter>Form Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CSingleTreeItem.cpp">
+      <Filter>Form Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CSingleTreeItemModel.cpp">
+      <Filter>Form Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CMainWindow.cpp">
+      <Filter>Form Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CAoBTreeItemsDetailModel.cpp">
+      <Filter>Form Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CAoBTreeItemsDetailWidget.cpp">
+      <Filter>Form Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CComboBoxDelegate.cpp">
+      <Filter>Form Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CIntDelegate.cpp">
+      <Filter>Form Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CAoBTreeItemWidget.cpp">
+      <Filter>Form Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CAoBTreeItemModel.cpp">
+      <Filter>Form Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CAoBTreeItemDelegate.cpp">
+      <Filter>Form Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CProcessDialog.cpp">
+      <Filter>Form Files\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="findpattern.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CFindPatternWorker.cpp">
+      <Filter>Form Files\Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="CAoBTreeItem.hpp">
+      <Filter>Form Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CSingleTreeItem.hpp">
+      <Filter>Form Files\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="qsingleton.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="findpattern.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="CAoBTreeItemModel.hpp">
+      <Filter>Form Files\Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="CAoBTreeItemWidget.hpp">
+      <Filter>Form Files\Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="CSingleTreeItemModel.hpp">
+      <Filter>Form Files\Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="CMainWindow.hpp">
+      <Filter>Form Files\Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="CAoBTreeItemsDetailModel.hpp">
+      <Filter>Form Files\Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="CAoBTreeItemsDetailWidget.hpp">
+      <Filter>Form Files\Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="CComboBoxDelegate.hpp">
+      <Filter>Form Files\Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="CIntDelegate.hpp">
+      <Filter>Form Files\Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="CAoBTreeItemDelegate.hpp">
+      <Filter>Form Files\Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="CProcessDialog.hpp">
+      <Filter>Form Files\Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="CFindPatternWorker.hpp">
+      <Filter>Form Files\Header Files</Filter>
+    </QtMoc>
+  </ItemGroup>
+</Project>

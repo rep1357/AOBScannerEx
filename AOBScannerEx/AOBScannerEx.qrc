@@ -1,0 +1,13 @@
+<RCC>
+    <qresource prefix="/">
+        <file>images/About-64.png</file>
+        <file>images/Add Row-64.png</file>
+        <file>images/Close Window-64.png</file>
+        <file>images/Computer-64.png</file>
+        <file>images/Delete Row-64.png</file>
+        <file>images/Open Folder-64.png</file>
+        <file>images/Save as-64.png</file>
+        <file>images/Save-64.png</file>
+        <file>images/Search-64.png</file>
+    </qresource>
+</RCC>
