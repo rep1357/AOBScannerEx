@@ -198,7 +198,6 @@
     <ClInclude Include="CSingleTreeItem.hpp" />
     <QtMoc Include="CSingleTreeItemModel.hpp" />
     <ClInclude Include="findpattern.hpp" />
-    <ClInclude Include="qsingleton.hpp" />
     <ClInclude Include="stdafx.h" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">Create</PrecompiledHeader>

@@ -31,6 +31,34 @@ QList<QPair<QString, QVariant>> get_method_items()
 	return items;
 }
 
+CAoBTreeItem* CAoBTreeItem::getItem(const QModelIndex & index)
+{
+	return static_cast<CAoBTreeItem*>(index.internalPointer());
+}
+
+bool CAoBTreeItem::isGroupIndex(const QModelIndex& index)
+{
+	if (!index.isValid())
+		return false;
+
+	const CAoBTreeItem* item = static_cast<CAoBTreeItem*>(index.internalPointer());
+	if (item->type() != TYPE_GROUP)
+		return false;
+
+	return true;
+}
+bool CAoBTreeItem::isGroupItemIndex(const QModelIndex& index)
+{
+	if (!index.isValid())
+		return false;
+
+	const CAoBTreeItem* item = static_cast<CAoBTreeItem*>(index.internalPointer());
+	if (item->type() != TYPE_GROUP_ITEM)
+		return false;
+
+	return true;
+}
+
 CAoBTreeItem::CAoBTreeItem(CAoBTreeItem* parent) : CSingleTreeItem(parent)
 {
 }

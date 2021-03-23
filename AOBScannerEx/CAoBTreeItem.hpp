@@ -42,6 +42,10 @@ QList<QPair<QString, QVariant>> get_method_items();
 class CAoBTreeItem : public CSingleTreeItem
 {
 public:
+	static CAoBTreeItem* getItem(const QModelIndex& index);
+	static bool isGroupIndex(const QModelIndex& index);
+	static bool isGroupItemIndex(const QModelIndex& index);
+
 	explicit CAoBTreeItem(CAoBTreeItem* parent = nullptr);
 	~CAoBTreeItem() = default;
 	

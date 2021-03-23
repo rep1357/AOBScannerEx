@@ -14,10 +14,16 @@ public:
 	explicit CAoBTreeItemsDetailWidget(CAoBTreeItemWidget* treeWidget, QWidget* parent = nullptr);
 	~CAoBTreeItemsDetailWidget(); 
 
+	CAoBTreeItemsDetailModel* model() const;
+
 public slots:
 	void OnShowDetail(const QModelIndex& current);
 
+private slots:
+	void OnContextMenuRequested(const QPoint& pos);
+
 private:
+	CAoBTreeItemWidget* m_treeWidget;
 	CAoBTreeItemsDetailModel* m_model;
 	QTableView* m_view;
 };

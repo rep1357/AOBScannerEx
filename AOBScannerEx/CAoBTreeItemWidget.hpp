@@ -1,7 +1,6 @@
 #pragma once
 
 QT_BEGIN_NAMESPACE
-class CMainWindow;
 class CAoBTreeItem;
 class CAoBTreeItemModel;
 class CFindPatternWorker;
@@ -11,6 +10,7 @@ QT_END_NAMESPACE
 class CAoBTreeItemWidget : public QScrollArea
 {
 	friend class CMainWindow;
+	friend class CAoBTreeItemsDetailWidget;
 
 	Q_OBJECT
 
@@ -33,8 +33,7 @@ public:
 private:
 	void updateDetailWidget();
 
-	bool isGroupIndex(const QModelIndex& index);
-	bool isGroupItemIndex(const QModelIndex& index);
+	int workerRequestCountTotal() const;
 
 	bool insertRowItems(const QModelIndex& parent);
 

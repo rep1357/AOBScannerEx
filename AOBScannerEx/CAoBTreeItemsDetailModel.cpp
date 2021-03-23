@@ -5,6 +5,7 @@
 #include "CAoBTreeItemModel.hpp"
 #include "CAoBTreeItem.hpp"
 
+
 CAoBTreeItemsDetailModel::CAoBTreeItemsDetailModel(CAoBTreeItemWidget* treeWidget, QObject* parent) : QAbstractTableModel(parent)
 {
 	this->m_treeWidget = treeWidget;
@@ -14,10 +15,23 @@ void CAoBTreeItemsDetailModel::setTreeSelectedIndex(const QModelIndex& index)
 {
 	this->m_treeSelectedIndex = index;
 }
-
+QModelIndex CAoBTreeItemsDetailModel::treeSelectedIndex() const
+{
+	return this->m_treeSelectedIndex;
+}
 CAoBTreeItemWidget* CAoBTreeItemsDetailModel::treeWidget() const
 {
 	return this->m_treeWidget;
+}
+QModelIndex CAoBTreeItemsDetailModel::treeWidgetIndex(int row) const
+{
+	if (!this->m_treeSelectedIndex.isValid())
+		return QModelIndex();
+
+	if (this->rowCount() <= row)
+		return QModelIndex();
+
+	return this->m_treeWidget->model()->index(row, 0, this->m_treeSelectedIndex);
 }
 
 int CAoBTreeItemsDetailModel::rowCount(const QModelIndex &parent) const
@@ -113,8 +127,9 @@ bool CAoBTreeItemsDetailModel::setData(const QModelIndex &index, const QVariant 
 		{
 			case 0:
 			{
-				static_cast<CAoBTreeItem*>(child.internalPointer())->setName(value.toString());
+				CAoBTreeItem::getItem(child)->setName(value.toString());
 				emit this->dataChanged(index, index);
+				emit this->updateReady(child);
 				return true;
 			}
 			case 1:
@@ -129,8 +144,10 @@ bool CAoBTreeItemsDetailModel::setData(const QModelIndex &index, const QVariant 
 				if (!ok || i < 0)
 					return false;
 
-				this->m_treeWidget->treeItem(2, child)->setOrder(i);
+				const QModelIndex& order = this->m_treeWidget->model()->index(2, 0, child);
+				CAoBTreeItem::getItem(order)->setOrder(i);
 				emit this->dataChanged(index, index);
+				emit this->updateReady(order);
 				return true;
 			}
 			case 3:
@@ -140,14 +157,18 @@ bool CAoBTreeItemsDetailModel::setData(const QModelIndex &index, const QVariant 
 				if (!ok)
 					return false;
 
-				this->m_treeWidget->treeItem(3, child)->setOffset(i);
+				const QModelIndex& offset = this->m_treeWidget->model()->index(3, 0, child);
+				CAoBTreeItem::getItem(offset)->setOffset(i);
 				emit this->dataChanged(index, index);
+				emit this->updateReady(offset);
 				return true;
 			}
 			case 4:
 			{
-				this->m_treeWidget->treeItem(0, child)->setPattern(value.toString());
+				const QModelIndex& pattern = this->m_treeWidget->model()->index(0, 0, child);
+				CAoBTreeItem::getItem(pattern)->setPattern(value.toString());
 				emit this->dataChanged(index, index);
+				emit this->updateReady(pattern);
 				return true;
 			}
 			case 5:
@@ -157,11 +178,17 @@ bool CAoBTreeItemsDetailModel::setData(const QModelIndex &index, const QVariant 
 				if (!ok)
 					return false;
 
-				this->m_treeWidget->treeItem(7, child)->setResult(i);
-				this->m_treeWidget->treeItem(6, child)->setSearched(true);
+				const QModelIndex& result = this->m_treeWidget->model()->index(7, 0, child);
+				const QModelIndex& searched = this->m_treeWidget->model()->index(6, 0, child);
+				CAoBTreeItem::getItem(result)->setResult(i);
+				CAoBTreeItem::getItem(searched)->setSearched(true);
 
 				// update entire row
 				emit this->dataChanged(this->index(row, 0), this->index(row, this->columnCount() - 1));
+				// update tree items
+				emit this->updateReady(result);
+				emit this->updateReady(searched);
+				emit this->updateReady(child);
 				return true;
 			}
 		}
@@ -177,8 +204,10 @@ bool CAoBTreeItemsDetailModel::setData(const QModelIndex &index, const QVariant 
 				if (!ok)
 					return false;
 
-				this->m_treeWidget->treeItem(1, child)->setMethod(i);
+				const QModelIndex& method = this->m_treeWidget->model()->index(1, 0, child);
+				CAoBTreeItem::getItem(method)->setMethod(i);
 				emit this->dataChanged(index, index);
+				emit this->updateReady(method);
 				return true;
 			}
 		}
@@ -216,4 +245,22 @@ Qt::ItemFlags CAoBTreeItemsDetailModel::flags(const QModelIndex &index) const
 	//if (index.column() != 5)
 	flags |= Qt::ItemIsEditable;
 	return flags;
+}
+
+void CAoBTreeItemsDetailModel::update(int row)
+{
+	if (this->rowCount() <= row)
+		return;
+
+	// update entire row
+	emit this->dataChanged(this->index(row, 0), this->index(row, this->columnCount() - 1));
+}
+void CAoBTreeItemsDetailModel::updateAll()
+{
+	const int row = this->rowCount();
+	for (int i = 0; i < row; i++)
+	{
+		// update entire row
+		emit this->dataChanged(this->index(i, 0), this->index(i, this->columnCount() - 1));
+	}
 }

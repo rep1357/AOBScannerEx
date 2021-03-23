@@ -89,9 +89,6 @@
     <ClInclude Include="CSingleTreeItem.hpp">
       <Filter>Form Files\Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="qsingleton.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="findpattern.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>

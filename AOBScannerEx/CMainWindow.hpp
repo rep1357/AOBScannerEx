@@ -13,9 +13,6 @@ public:
 	explicit CMainWindow(QWidget *parent = nullptr);
 	~CMainWindow(); 
 
-	CAoBTreeItemWidget* aobTree() const;
-	CAoBTreeItemsDetailWidget* aobTreeItemsDetail() const;
-
 private:
 	void closeEvent(QCloseEvent* event);
 	void saveSettings();
@@ -25,7 +22,7 @@ private slots:
 	void OnAbout();
 
 private:
-	CAoBTreeItemWidget* m_aobTree;
-	CAoBTreeItemsDetailWidget* m_aobTreeItemsDetail;
+	CAoBTreeItemWidget* m_itemWidget;
+	CAoBTreeItemsDetailWidget* m_itemDetailWidget;
 	QSplitter* m_splitter;
 };

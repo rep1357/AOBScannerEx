@@ -10,6 +10,9 @@
 #include "CProcessDialog.hpp"
 #include "CFindPatternWorker.hpp"
 
+#include "CIntDelegate.hpp"
+#include "CComboBoxDelegate.hpp"
+
 #include <winternl.h>
 #pragma comment(lib, "ntdll.lib")
 
@@ -40,10 +43,12 @@ CAoBTreeItemWidget::CAoBTreeItemWidget(QWidget* parent) : QScrollArea(parent)
 		"QTreeView::item:hover { background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 0, stop: 0 lightgray, stop: 1 white); }"
 		"QTreeView::item:selected:active { background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 0, stop: 0 lightgray, stop: 1 lightgray); color: black; }"
 		"QTreeView::item:selected:!active { background: qlineargradient(x1: 0, y1: 0, x2: 1, y2: 0, stop: 0 lightgray, stop: 1 lightgray); color: black;}";
-	this->m_view->setStyleSheet(treeViewStyle);
+	//this->m_view->setStyleSheet(treeViewStyle);
 	// delegate
 	CAoBTreeItemDelegate* itemDelegate = new CAoBTreeItemDelegate(this);
-	itemDelegate->setComboBoxItems(std::move(get_method_items()));
+	itemDelegate->setMethodDelegate(new CComboBoxDelegate(std::move(get_method_items()), this));
+	itemDelegate->setOrderDelegate(new CIntDelegate(1, 100, this));
+	itemDelegate->setOffsetDelegate(new CIntDelegate(-1000, 1000, this));
 	this->m_view->setItemDelegate(itemDelegate);
 
 	// connect
@@ -96,7 +101,7 @@ void CAoBTreeItemWidget::OnContextMenuRequested(const QPoint &pos)
 	// scan
 	action = menu->addAction("Scan", this, SLOT(OnScan()));
 	action->setData(index);
-	action->setEnabled(this->isGroupItemIndex(index));
+	action->setEnabled(CAoBTreeItem::isGroupItemIndex(index));
 	menu->addAction(action);
 
 	// scan all and separator :^)
@@ -112,19 +117,19 @@ void CAoBTreeItemWidget::OnContextMenuRequested(const QPoint &pos)
 	// insert row item
 	action = menu->addAction(QIcon(":/images/Add Row-64.png"), "Insert Row Item", this, SLOT(OnInsertRowItem()));
 	action->setData(index);
-	action->setEnabled(this->isGroupIndex(index));
+	action->setEnabled(CAoBTreeItem::isGroupIndex(index));
 	menu->addAction(action);
 
 	// remove row
 	action = menu->addAction(QIcon(":/images/Delete Row-64.png"), "Remove Row", this, SLOT(OnRemoveRow()));
 	action->setData(index);
-	action->setEnabled(this->isGroupIndex(index));
+	action->setEnabled(CAoBTreeItem::isGroupIndex(index));
 	menu->addAction(action);
 
 	// remove row item
 	action = menu->addAction(QIcon(":/images/Delete Row-64.png"), "Remove Row Item", this, SLOT(OnRemoveRowItem()));
 	action->setData(index);
-	action->setEnabled(this->isGroupItemIndex(index));
+	action->setEnabled(CAoBTreeItem::isGroupItemIndex(index));
 	menu->addAction(action);
 
 	menu->popup(this->m_view->viewport()->mapToGlobal(pos));
@@ -132,7 +137,7 @@ void CAoBTreeItemWidget::OnContextMenuRequested(const QPoint &pos)
 
 void CAoBTreeItemWidget::OnTreeItemSingleClicked(const QModelIndex& index)
 {
-	if (index.isValid() && index.parent() == this->m_view->rootIndex())
+	if (CAoBTreeItem::isGroupIndex(index))
 	{
 		emit this->handleShowDetail(index);
 		this->m_detailIndex = index;
@@ -169,7 +174,7 @@ void CAoBTreeItemWidget::OnTreeItemDoubleClicked(const QModelIndex& index)
 
 void CAoBTreeItemWidget::OnSelectionCurrentChanged(const QModelIndex& current, const QModelIndex& previous)
 {
-	if (current.isValid() && current.parent() == this->m_view->rootIndex())
+	if (CAoBTreeItem::isGroupIndex(current))
 	{
 		emit this->handleShowDetail(current);
 		this->m_detailIndex = current;
@@ -352,13 +357,71 @@ void CAoBTreeItemWidget::OnOpenProcess()
 
 void CAoBTreeItemWidget::OnExport()
 {
+	QSettings settings;
+	QString filename = QFileDialog::getSaveFileName(this, QString(), settings.value("exportDir").toString(), "Header files (*.h;*.hpp;*.txt)");
+	if (filename.isEmpty())
+		return;
 
+	settings.setValue("exportDir", filename);
+
+	QFile file(filename);
+	if (!file.open(QIODevice::WriteOnly))
+		return;
+
+	const QString ver = QInputDialog::getText(this, QString(), tr("Enter comment :"));
+	if (ver.isEmpty())
+		return;
+
+	QTextStream stream(&file);
+
+	const QModelIndex& rootIndex = this->m_view->rootIndex();
+	const int rowGroups = this->m_model->rowCount(rootIndex);
+	for (int i = 0; i < rowGroups; i++)
+	{
+		const QModelIndex& groupChild = this->m_model->index(i, 0, rootIndex);
+		const int rowGroupItems = this->m_model->rowCount(groupChild);
+
+		stream << tr("// %1\r\n").arg(this->m_model->dataVariant(groupChild).toString());
+		for (int j = 0; j < rowGroupItems; j++)
+		{
+			const QModelIndex& groupItemChild = this->m_model->index(j, 0, groupChild);
+			if (CAoBTreeItem::isGroupItemIndex(groupItemChild))
+			{
+				const bool ignore = this->m_model->dataVariant(this->m_model->index(4, 0, groupItemChild)).toBool();
+				if (ignore)
+				{
+					// skip
+					continue;
+				}
+
+				const QString name = this->m_model->dataVariant(groupItemChild).toString();
+				if (name.isEmpty())
+				{
+					stream << tr("\r\n");
+					continue;
+				}
+
+				const bool comment = this->m_model->dataVariant(this->m_model->index(5, 0, groupItemChild)).toBool();
+				if (comment)
+				{
+					stream << tr("// %1\r\n").arg(name);
+					continue;
+				}
+
+				const QString result = this->m_model->dataVariant(this->m_model->index(7, 0, groupItemChild)).toString();
+				stream << tr("#define %1 %2 // %3\r\n").arg(name).arg(result).arg(ver);
+			}
+		}
+		stream << tr("\r\n");
+	}
+
+	QMessageBox::information(this, QString(), tr("Done."), QMessageBox::Ok);
 }
 
 void CAoBTreeItemWidget::OnScan()
 {
 	const QModelIndex &index = qobject_cast<QAction*>(sender())->data().toModelIndex();
-	if (!this->isGroupItemIndex(index))
+	if (!CAoBTreeItem::isGroupItemIndex(index))
 		return;
 
 	if (this->m_moduleBuffer == NULL)
@@ -407,7 +470,7 @@ void CAoBTreeItemWidget::OnInsertRow()
 void CAoBTreeItemWidget::OnInsertRowItem()
 {
 	const QModelIndex &index = qobject_cast<QAction*>(sender())->data().toModelIndex();
-	if (!this->isGroupIndex(index))
+	if (!CAoBTreeItem::isGroupIndex(index))
 		return;
 
 	const QString name = QInputDialog::getText(this, QString(), tr("Enter item name :"));
@@ -430,7 +493,7 @@ void CAoBTreeItemWidget::OnInsertRowItem()
 void CAoBTreeItemWidget::OnRemoveRow()
 {
 	const QModelIndex &index = qobject_cast<QAction*>(sender())->data().toModelIndex();
-	if (!this->isGroupIndex(index))
+	if (!CAoBTreeItem::isGroupIndex(index))
 		return;
 
 	if (!this->m_model->removeRow(index.row(), index.parent()))
@@ -441,7 +504,7 @@ void CAoBTreeItemWidget::OnRemoveRow()
 void CAoBTreeItemWidget::OnRemoveRowItem()
 {
 	const QModelIndex &index = qobject_cast<QAction*>(sender())->data().toModelIndex();
-	if (!this->isGroupItemIndex(index))
+	if (!CAoBTreeItem::isGroupItemIndex(index))
 		return;
 
 	if (!this->m_model->removeRow(index.row(), index.parent()))
@@ -452,7 +515,7 @@ void CAoBTreeItemWidget::OnRemoveRowItem()
 
 void CAoBTreeItemWidget::scan(const QModelIndex& index)
 {
-	if (!this->isGroupItemIndex(index))
+	if (!CAoBTreeItem::isGroupItemIndex(index))
 		return;
 
 	if (this->treeItem(0, index)->pattern().isEmpty())
@@ -496,7 +559,7 @@ void CAoBTreeItemWidget::scanAll()
 		for (int j = 0; j < rowGroupItems; j++)
 		{
 			const QModelIndex& groupItemChild = this->m_model->index(j, 0, groupChild);
-			if (this->isGroupItemIndex(groupItemChild))
+			if (CAoBTreeItem::isGroupItemIndex(groupItemChild))
 			{
 				this->scan(groupItemChild);
 			}
@@ -515,8 +578,10 @@ void CAoBTreeItemWidget::OnHandleResults(const QModelIndex& index, unsigned long
 			break;
 		}
 	}
-
 	this->m_model->setData(index, result);
+
+	if (this->workerRequestCountTotal() == 0)
+		this->updateDetailWidget();
 }
 
 CAoBTreeItemModel* CAoBTreeItemWidget::model() const
@@ -540,32 +605,17 @@ void CAoBTreeItemWidget::updateDetailWidget()
 		emit this->m_view->clicked(this->m_detailIndex);
 }
 
-bool CAoBTreeItemWidget::isGroupIndex(const QModelIndex& index)
+int CAoBTreeItemWidget::workerRequestCountTotal() const
 {
-	if (!index.isValid())
-		return false;
-	
-	const CAoBTreeItem* item = static_cast<CAoBTreeItem*>(index.internalPointer());
-	if (item->type() != TYPE_GROUP)
-		return false;
-
-	return true;
-}
-bool CAoBTreeItemWidget::isGroupItemIndex(const QModelIndex& index)
-{
-	if (!index.isValid())
-		return false;
-
-	const CAoBTreeItem* item = static_cast<CAoBTreeItem*>(index.internalPointer());
-	if (item->type() != TYPE_GROUP_ITEM)
-		return false;
-
-	return true;
+	int requestCountTotal = 0;
+	for (auto worker : this->m_workers)
+		requestCountTotal += worker.requestCount;
+	return requestCountTotal;
 }
 
 bool CAoBTreeItemWidget::insertRowItems(const QModelIndex& parent)
 {
-	if (!this->isGroupItemIndex(parent))
+	if (!CAoBTreeItem::isGroupItemIndex(parent))
 		return false;
 
 	// insert items
@@ -597,7 +647,7 @@ void CAoBTreeItemWidget::writeXmlElement(QXmlStreamWriter& writer)
 		{
 			const QModelIndex& groupItemChild = this->m_model->index(j, 0, groupChild);
 			const CAoBTreeItem* groupItemItem = static_cast<CAoBTreeItem*>(groupItemChild.internalPointer());
-			writer.writeTextElement("groupitem", groupItemItem->name());
+			writer.writeTextElement("groupitem", groupItemItem->name());			
 
 			// Pattern	: 0
 			// Method	: 1
@@ -608,6 +658,7 @@ void CAoBTreeItemWidget::writeXmlElement(QXmlStreamWriter& writer)
 			// Searched	: 6
 			// Result	: 7
 			writer.writeStartElement("groupitemsitem");
+			writer.writeTextElement("expanded", QString::number(this->m_view->isExpanded(groupItemChild)));
 			writer.writeTextElement("pattern", this->treeItem(0, groupItemChild)->pattern());
 			writer.writeTextElement("method", QString::number(this->treeItem(1, groupItemChild)->method()));
 			writer.writeTextElement("order", QString::number(this->treeItem(2, groupItemChild)->order()));
@@ -644,7 +695,9 @@ void CAoBTreeItemWidget::readXmlGroupItem(QXmlStreamReader& reader, const QModel
 				// Comment	: 5
 				// Searched	: 6
 				// Result	: 7
-				if (reader.name() == "pattern")
+				if (reader.name() == "expanded")
+					this->m_view->setExpanded(parent, reader.readElementText().toInt());
+				else if (reader.name() == "pattern")
 					this->treeItem(0, parent)->setPattern(reader.readElementText());
 				else if (reader.name() == "method")
 					this->treeItem(1, parent)->setMethod(reader.readElementText().toInt());
@@ -681,14 +734,8 @@ void CAoBTreeItemWidget::readXmlGroup(QXmlStreamReader& reader, const QModelInde
 				const QModelIndex& groupItemChild = this->insertGroupItem(reader.readElementText(), parent);
 				if (groupItemChild.isValid())
 				{
-					// next
-					this->m_view->setCurrentIndex(groupItemChild);
-
 					// read group item
 					this->readXmlGroupItem(reader, groupItemChild);
-
-					// prev
-					this->m_view->setCurrentIndex(this->m_view->selectionModel()->currentIndex().parent());
 				}
 			}
 		}
@@ -716,14 +763,11 @@ void CAoBTreeItemWidget::readFromXml(QXmlStreamReader& reader)
 				const QModelIndex& groupChild = this->insertGroup(reader.readElementText());
 				if (groupChild.isValid())
 				{
-					// next
-					this->m_view->setCurrentIndex(groupChild);
-
 					// read group
 					this->readXmlGroup(reader, groupChild);
 
-					// prev
-					this->m_view->setCurrentIndex(this->m_view->selectionModel()->currentIndex().parent());
+					// expand
+					this->m_view->setExpanded(groupChild, true);
 				}
 			}			
 		}

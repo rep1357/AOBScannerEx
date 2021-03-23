@@ -14,7 +14,7 @@ public:
 	explicit CAoBTreeItemModel(QWidget* parent = nullptr);
 	~CAoBTreeItemModel() = default;
 
-	QVariant data(const QModelIndex& index, int role) const Q_DECL_OVERRIDE;
+	QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const Q_DECL_OVERRIDE;
 	bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) Q_DECL_OVERRIDE;
 
 	Qt::ItemFlags flags(const QModelIndex &index) const Q_DECL_OVERRIDE;
@@ -22,6 +22,14 @@ public:
 
 	CAoBTreeItem* getItem(int row, const QModelIndex& index) const;
 
+	void update(const QModelIndex& index);
+
+	QVariant dataVariant(const QModelIndex& index) const;
+
+signals:
+	void updateReady(int row); // => CAoBTreeItemsDetailModel::update
+
 private:
-	QVariant dataDisplayRole(const CAoBTreeItem* item) const;
+	QVariant dataDisplayRole(const QModelIndex& index) const;
+	QVariant dataBackgroundRole(const QModelIndex& index) const;
 };

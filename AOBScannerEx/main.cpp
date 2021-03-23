@@ -4,11 +4,6 @@
 
 int main(int argc, char *argv[])
 {
-#ifdef _WIN32
-    AllocConsole();
-    freopen("CONOUT$", "w", stdout);
-#endif
-
     Q_INIT_RESOURCE(AOBScannerEx);
 
     QCoreApplication::setOrganizationName("Japanese1337hackers");
